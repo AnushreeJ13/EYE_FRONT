@@ -1,0 +1,21 @@
+{
+  "short_name": "EyeSpy",
+  "name": "EyeSpy - Wakefulness Guardian",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/vite.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0a0a12",
+  "display": "standalone",
+  "theme_color": "#0a0a12",
+  "description": "Your Personal Wakefulness Guardian"
+}
