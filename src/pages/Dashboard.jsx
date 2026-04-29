@@ -164,7 +164,11 @@ export default function Dashboard() {
       };
 
       ws.onclose = () => setIsActive(false);
-      ws.onerror = () => ws.close();
+      ws.onerror = (err) => {
+        console.error("WebSocket error:", err);
+        alert("Failed to connect to the detection server. Please check your connection or wait for the server to wake up.");
+        ws.close();
+      };
     } catch (err) {
       alert("Camera access denied: " + err.message);
     }

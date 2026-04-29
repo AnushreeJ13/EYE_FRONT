@@ -215,6 +215,7 @@ img { max-width: 100%; display: block; }
 }
 .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow), inset 0 2px 4px rgba(0,0,0,0.05); background: var(--bg-primary);}
 .form-group select option { background: var(--bg-secondary); }
+.form-error { color: var(--danger); font-size: 0.9rem; font-weight: 600; margin-top: 0.5rem; background: var(--danger-glow); padding: 0.5rem; border-radius: var(--radius-sm); border: 1px solid var(--danger); text-align: center; }
 
 /* ── Auth Page ──────────────────────────────────────────────── */
 .auth-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--bg-primary); padding: 1rem; position: relative; overflow: hidden;}
