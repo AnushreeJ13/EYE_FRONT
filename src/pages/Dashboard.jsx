@@ -276,8 +276,8 @@ export default function Dashboard() {
           {/* Main: Video Feed */}
           <div className="dashboard-main">
             <div className="video-container">
-              <video ref={videoRef} playsInline muted style={{ display: "none" }} />
-              <canvas ref={canvasRef} style={{ display: isActive ? "block" : "none" }} />
+              <video ref={videoRef} playsInline muted style={{ display: isActive ? "block" : "none", width: "100%", borderRadius: "var(--radius-lg)" }} />
+              {/* <canvas ref={canvasRef} style={{ display: isActive ? "block" : "none" }} /> */}
               {isActive && (
                 <div className="video-status">
                   <span className="dot live" /> LIVE — {formatTime(elapsed)}
