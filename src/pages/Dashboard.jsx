@@ -98,13 +98,28 @@ export default function Dashboard() {
       return;
     }
     
-    isServerBusy.current = true;
+    const video = videoRef.current;
+    const vW = video.videoWidth;
+    const vH = video.videoHeight;
+    
+    // Maintain aspect ratio while keeping resolution low for the server
+    const maxDim = 320;
+    let targetW, targetH;
+    
+    if (vW > vH) {
+      targetW = maxDim;
+      targetH = Math.floor(maxDim * (vH / vW));
+    } else {
+      targetH = maxDim;
+      targetW = Math.floor(maxDim * (vW / vH));
+    }
+
     const c = document.createElement("canvas");
-    // Reduce resolution significantly to minimize server-side memory spikes
-    c.width = 320; c.height = 240;
+    c.width = targetW; 
+    c.height = targetH;
     const ctx = c.getContext("2d");
-    ctx.drawImage(videoRef.current, 0, 0, 320, 240);
-    const dataUrl = c.toDataURL("image/jpeg", 0.5); // Lower quality saves more bandwidth
+    ctx.drawImage(video, 0, 0, targetW, targetH);
+    const dataUrl = c.toDataURL("image/jpeg", 0.5);
     const b64 = dataUrl.split(",")[1];
     
     // Log payload size for debugging
