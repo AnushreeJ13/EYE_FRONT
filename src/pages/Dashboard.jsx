@@ -134,10 +134,13 @@ export default function Dashboard() {
 
       const baseUrl = import.meta.env.VITE_BACKEND_URL || window.location.origin;
       const wsUrl = baseUrl.replace(/^http/, "ws") + "/ws/detect";
+      console.log("Connecting to WebSocket at:", wsUrl);
+      
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {
+        console.log("WebSocket connection established!");
         setIsActive(true);
         setElapsed(0);
         setSessionStats({ drowsinessEvents: 0, blinks: 0, yawns: 0 });
@@ -147,6 +150,7 @@ export default function Dashboard() {
       };
 
       ws.onmessage = (e) => {
+        console.log("Message received from server");
         try {
           const data = JSON.parse(e.data);
           if (data.type === "detection") {
@@ -187,7 +191,10 @@ export default function Dashboard() {
         } catch {}
       };
 
-      ws.onclose = () => setIsActive(false);
+      ws.onclose = (event) => {
+        console.log("WebSocket connection closed:", event.code, event.reason);
+        setIsActive(false);
+      };
       ws.onerror = (err) => {
         console.error("WebSocket error:", err);
         alert("Failed to connect to the detection server. Please check your connection or wait for the server to wake up.");
