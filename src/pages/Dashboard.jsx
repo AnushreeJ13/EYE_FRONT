@@ -100,25 +100,29 @@ export default function Dashboard() {
     
     isServerBusy.current = true;
     const c = document.createElement("canvas");
-    // Reduce resolution slightly to save bandwidth and backend memory
-    c.width = 480; c.height = 360;
+    // Reduce resolution significantly to minimize server-side memory spikes
+    c.width = 320; c.height = 240;
     const ctx = c.getContext("2d");
-    ctx.drawImage(videoRef.current, 0, 0, 480, 360);
-    const dataUrl = c.toDataURL("image/jpeg", 0.6); // Lower quality saves ~30% payload size
+    ctx.drawImage(videoRef.current, 0, 0, 320, 240);
+    const dataUrl = c.toDataURL("image/jpeg", 0.5); // Lower quality saves more bandwidth
     const b64 = dataUrl.split(",")[1];
+    
+    // Log payload size for debugging
+    if (Math.random() < 0.1) console.log("Payload size (b64 chars):", b64.length);
+
     try {
       wsRef.current.send(JSON.stringify({ type: "frame", data: b64 }));
     } catch {
       isServerBusy.current = false;
     }
     
-    // Safety fallback: if the server takes longer than 1 second to respond, reset the busy flag
+    // Safety fallback
     setTimeout(() => {
       isServerBusy.current = false;
-    }, 1000);
+    }, 2000);
     
-    // Schedule next frame attempt
-    frameLoopRef.current = setTimeout(sendFrame, 150); // ~6.6 fps is plenty for drowsiness
+    // Schedule next frame attempt (reduced to 4 fps for stability)
+    frameLoopRef.current = setTimeout(sendFrame, 250);
   }, []);
 
   const startSession = async () => {
