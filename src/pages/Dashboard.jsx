@@ -86,18 +86,39 @@ export default function Dashboard() {
 
   const formatTime = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
+  // Track if we are waiting for a server response to avoid queueing up too many frames (backpressure)
+  const isServerBusy = useRef(false);
+
   const sendFrame = useCallback(() => {
     if (!videoRef.current || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
+    
+    // Prevent flooding the backend (which causes OOM crashes on Render)
+    if (isServerBusy.current) {
+      frameLoopRef.current = setTimeout(sendFrame, 150); // check again slightly later
+      return;
+    }
+    
+    isServerBusy.current = true;
     const c = document.createElement("canvas");
-    c.width = 640; c.height = 480;
+    // Reduce resolution slightly to save bandwidth and backend memory
+    c.width = 480; c.height = 360;
     const ctx = c.getContext("2d");
-    ctx.drawImage(videoRef.current, 0, 0, 640, 480);
-    const dataUrl = c.toDataURL("image/jpeg", 0.7);
+    ctx.drawImage(videoRef.current, 0, 0, 480, 360);
+    const dataUrl = c.toDataURL("image/jpeg", 0.6); // Lower quality saves ~30% payload size
     const b64 = dataUrl.split(",")[1];
     try {
       wsRef.current.send(JSON.stringify({ type: "frame", data: b64 }));
-    } catch {}
-    frameLoopRef.current = setTimeout(sendFrame, 100); // ~10fps
+    } catch {
+      isServerBusy.current = false;
+    }
+    
+    // Safety fallback: if the server takes longer than 1 second to respond, reset the busy flag
+    setTimeout(() => {
+      isServerBusy.current = false;
+    }, 1000);
+    
+    // Schedule next frame attempt
+    frameLoopRef.current = setTimeout(sendFrame, 150); // ~6.6 fps is plenty for drowsiness
   }, []);
 
   const startSession = async () => {
@@ -129,6 +150,9 @@ export default function Dashboard() {
         try {
           const data = JSON.parse(e.data);
           if (data.type === "detection") {
+            // Unblock next frame transmission
+            isServerBusy.current = false;
+            
             setMetrics(data.metrics);
 
             // Feed metrics to audio engine for alert handling
